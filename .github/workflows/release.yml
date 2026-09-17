@@ -1,0 +1,66 @@
+# Release on a bare `x.y.z` tag.
+#
+# The tag must equal `version` in manifest.json: Obsidian downloads
+# `manifest.json` and `theme.css` from the release whose tag matches the
+# manifest, so a mismatch ships a theme nobody can install.
+#
+# A theme has no build step and no `main.js`. The release assets are the two
+# files themselves, taken straight from the repository, which is also the whole
+# of what a reviewer reads. Nothing is generated, so there is nothing that could
+# disagree with the source.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Check that the tag matches manifest.json
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          version="$(node -p "require('./manifest.json').version")"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag '$tag' does not match manifest version '$version'"
+            exit 1
+          fi
+
+      - name: Fail if the theme reaches for the network
+        run: |
+          # Community themes may not load remote assets: no webfonts, no remote
+          # images. Everything has to work offline. This is an error-severity
+          # rule in the directory's own Stylelint config; checking it here means
+          # a release cannot be cut that would fail review for it.
+          if grep -nE "@import[^;]*url\(|url\(\s*['\"]?(https?:|//)" theme.css; then
+            echo "::error::theme.css loads a remote asset; bundle it as a data: URI instead"
+            exit 1
+          fi
+          echo "no remote assets referenced"
+
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            manifest.json
+            theme.css
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          gh release create "$tag" --title="$tag" --generate-notes manifest.json theme.css
