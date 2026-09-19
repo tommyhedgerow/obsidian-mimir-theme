@@ -1,3 +1,19 @@
 {
-  "extends": "stylelint-config-obsidianmd"
+  "extends": "stylelint-config-obsidianmd",
+  "rules": {
+    "selector-class-pattern": [
+      "^(?:[a-z][a-z0-9]*)(?:-[a-z0-9]+)*$|^(?:HyperMD-[A-Za-z0-9-]+|nodeLabel|edgeLabel)$",
+      {
+        "message": "Expected class selector \"%s\" to be kebab-case. The exceptions are Obsidian's and Mermaid's own classes \u2014 `.HyperMD-*` is Obsidian's live-preview markup and `.nodeLabel`/`.edgeLabel` are Mermaid's \u2014 which this theme has to match exactly and must never rename."
+      }
+    ],
+    "value-keyword-case": [
+      null,
+      {
+        "ignoreKeywords": [
+          "/.*/"
+        ]
+      }
+    ]
+  }
 }

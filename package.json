@@ -1,15 +1,21 @@
 {
   "name": "obsidian-mimir-theme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Warm paper, sage and serif: a reading theme for a learning vault.",
   "private": true,
   "scripts": {
     "lint": "stylelint theme.css"
   },
-  "keywords": ["obsidian", "obsidian-theme", "theme", "serif", "reading"],
+  "keywords": [
+    "obsidian",
+    "obsidian-theme",
+    "theme",
+    "serif",
+    "reading"
+  ],
   "license": "MIT",
   "devDependencies": {
-    "stylelint": "^16.0.0",
+    "stylelint": "^17.0.0",
     "stylelint-config-obsidianmd": "^0.1.0"
   }
 }
